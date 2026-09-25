@@ -2,6 +2,9 @@
 
 A simple, static toothbrushing timer designed for mobile phones or tablets.
 
+> Built from handwritten design notes — see [`docs/notes/`](docs/notes/) for
+> the original sketches this app was based on.
+
 ## Tech stack
 - Static HTML + PWA (installable, works offline via a service worker)
 - Hosted on GitHub Pages
