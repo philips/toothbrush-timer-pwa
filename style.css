@@ -121,25 +121,43 @@ h2 {
 
 .arch-base {
   fill: none;
-  stroke: #cdd9e0;
-  stroke-width: 14;
-  stroke-linecap: round;
+  stroke: #d8e2e8;
+  stroke-width: 2;
 }
 
-.arch-seg {
-  fill: none;
-  stroke: transparent;
-  stroke-width: 14;
-  stroke-linecap: round;
-  transition: stroke 0.25s ease;
+.tooth {
+  fill: #e3ecf2;
+  stroke: #b9c9d3;
+  stroke-width: 1;
+  transition: fill 0.25s ease, stroke 0.25s ease;
 }
 
-.arch-seg.on {
-  stroke: #2a9d8f;
+.tooth.on {
+  fill: #2a9d8f;
+  stroke: #1e6091;
 }
 
-.arch-seg.top-on {
-  stroke: #e76f51;
+.tooth.on.top-on {
+  fill: #2a9d8f;
+  stroke: #1e6091;
+  stroke-width: 2.5;
+  stroke-dasharray: 3 2;
+}
+
+.motion-caption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0 8px;
+  color: #345;
+  font-size: 0.95rem;
+  max-width: 300px;
+}
+
+.motion-icon {
+  font-size: 1.3rem;
+  color: #2a9d8f;
+  flex-shrink: 0;
 }
 
 .dots {

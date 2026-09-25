@@ -2,6 +2,12 @@
   "use strict";
 
   // ---------- Segments ----------
+  const MOTION_INFO = {
+    front: { icon: "\u2194", text: "Front teeth \u2014 gentle back-and-forth" },
+    back: { icon: "\u2194", text: "Back teeth, both sides \u2014 gentle back-and-forth" },
+    top: { icon: "\u21bb", text: "Chewing surfaces \u2014 small circles" },
+  };
+
   const SEGMENTS = [
     { arch: "upper", part: "front", label: "Upper Front" },
     { arch: "upper", part: "back", label: "Upper Back" },
@@ -40,6 +46,8 @@
   const segmentTimeEl = document.getElementById("segment-time");
   const dotsEl = document.getElementById("dots");
   const mouthSvg = document.getElementById("mouth-svg");
+  const motionIconEl = document.getElementById("motion-icon");
+  const motionTextEl = document.getElementById("motion-text");
 
   // ---------- Helpers ----------
   function fmt(sec) {
@@ -71,57 +79,65 @@
   }
 
   const archConfig = {
-    upper: { cx: 100, cy: 75, r: 55, start: 200, end: 340 },
-    lower: { cx: 100, cy: 125, r: 55, start: 20, end: 160 },
+    upper: { cx: 100, cy: 65, r: 58, start: 200, end: 340 },
+    lower: { cx: 100, cy: 135, r: 58, start: 20, end: 160 },
   };
+
+  const TEETH_PER_ARCH = 6;
+  // Which part each tooth (index, left-to-right) belongs to:
+  // the two outer teeth on each side are "back", the two center teeth are "front".
+  const TOOTH_PARTS = ["back", "back", "front", "front", "back", "back"];
 
   function buildMouth() {
     mouthSvg.innerHTML = "";
     const ns = "http://www.w3.org/2000/svg";
 
     Object.entries(archConfig).forEach(([arch, cfg]) => {
+      // faint gum line behind the teeth, for visual context only
+      const gum = document.createElementNS(ns, "path");
+      gum.setAttribute("d", arcPath(cfg.cx, cfg.cy, cfg.r, cfg.start, cfg.end));
+      gum.setAttribute("class", "arch-base");
+      mouthSvg.appendChild(gum);
+
       const span = cfg.end - cfg.start;
-      const third = span / 3;
+      const slice = span / TEETH_PER_ARCH;
 
-      // base full arc (background)
-      const base = document.createElementNS(ns, "path");
-      base.setAttribute("d", arcPath(cfg.cx, cfg.cy, cfg.r, cfg.start, cfg.end));
-      base.setAttribute("class", "arch-base");
-      mouthSvg.appendChild(base);
+      for (let i = 0; i < TEETH_PER_ARCH; i++) {
+        const angle = cfg.start + slice * (i + 0.5);
+        const pos = polar(cfg.cx, cfg.cy, cfg.r, angle);
+        const rotation = angle + 90;
 
-      // left, center(front), right segments
-      const segs = [
-        { part: "back", from: cfg.start, to: cfg.start + third },
-        { part: "front", from: cfg.start + third, to: cfg.start + 2 * third },
-        { part: "back", from: cfg.start + 2 * third, to: cfg.end },
-      ];
-
-      segs.forEach((s, i) => {
-        const path = document.createElementNS(ns, "path");
-        path.setAttribute("d", arcPath(cfg.cx, cfg.cy, cfg.r, s.from, s.to));
-        path.setAttribute("class", "arch-seg");
-        path.dataset.arch = arch;
-        path.dataset.part = s.part;
-        path.dataset.idx = i;
-        mouthSvg.appendChild(path);
-      });
+        const tooth = document.createElementNS(ns, "rect");
+        tooth.setAttribute("x", -7);
+        tooth.setAttribute("y", -11);
+        tooth.setAttribute("width", 14);
+        tooth.setAttribute("height", 22);
+        tooth.setAttribute("rx", 5);
+        tooth.setAttribute(
+          "transform",
+          `translate(${pos.x.toFixed(2)} ${pos.y.toFixed(2)}) rotate(${rotation.toFixed(2)})`
+        );
+        tooth.setAttribute("class", "tooth");
+        tooth.dataset.arch = arch;
+        tooth.dataset.part = TOOTH_PARTS[i];
+        mouthSvg.appendChild(tooth);
+      }
     });
   }
 
   function highlightSegment(seg) {
-    const paths = mouthSvg.querySelectorAll(".arch-seg");
-    paths.forEach((p) => {
-      p.classList.remove("on", "top-on");
-      const sameArch = p.dataset.arch === seg.arch;
-      if (!sameArch) return;
-
-      if (seg.part === "top") {
-        // highlight the whole arch (all three sub-segments) in the "top" color
-        p.classList.add("top-on");
-      } else if (p.dataset.part === seg.part) {
-        p.classList.add("on");
-      }
+    const teeth = mouthSvg.querySelectorAll(".tooth");
+    teeth.forEach((t) => {
+      const active =
+        t.dataset.arch === seg.arch &&
+        (seg.part === "top" || t.dataset.part === seg.part);
+      t.classList.toggle("on", active);
+      t.classList.toggle("top-on", active && seg.part === "top");
     });
+
+    const info = MOTION_INFO[seg.part];
+    motionIconEl.textContent = info.icon;
+    motionTextEl.textContent = info.text;
   }
 
   // ---------- Dots ----------
