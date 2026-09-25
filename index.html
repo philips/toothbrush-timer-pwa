@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#1e6091" />
+<title>Toothbrush Timer</title>
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="icons/icon.svg" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- SETUP SCREEN -->
+  <main id="setup-screen" class="screen active">
+    <h1>Toothbrush Timer</h1>
+
+    <div class="duration-picker">
+      <button id="dec-btn" class="round-btn" aria-label="Decrease duration">&minus;</button>
+      <div class="duration-display" id="duration-display">2:00</div>
+      <button id="inc-btn" class="round-btn" aria-label="Increase duration">&plus;</button>
+    </div>
+
+    <button id="start-btn" class="primary-btn">Start</button>
+
+    <p class="hint">Guides you through 6 segments: upper &amp; lower &mdash; front, back &amp; top.</p>
+  </main>
+
+  <!-- RUNNING SCREEN -->
+  <main id="run-screen" class="screen">
+    <div class="total-time" id="total-time">2:00</div>
+
+    <h2 id="segment-label">Upper Front</h2>
+
+    <svg id="mouth-svg" viewBox="0 0 200 200" class="mouth"></svg>
+
+    <div class="segment-time" id="segment-time">0:20</div>
+
+    <div class="dots" id="dots"></div>
+
+    <button id="stop-btn" class="secondary-btn">Stop</button>
+  </main>
+
+  <!-- DONE SCREEN -->
+  <main id="done-screen" class="screen">
+    <h1>Great job! 🦷✨</h1>
+    <p>You brushed every segment.</p>
+    <button id="restart-btn" class="primary-btn">Brush Again</button>
+  </main>
+
+<script src="app.js"></script>
+</body>
+</html>

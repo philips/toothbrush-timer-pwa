@@ -1,0 +1,19 @@
+{
+  "name": "Toothbrush Timer",
+  "short_name": "Toothbrush",
+  "description": "A simple brushing timer that guides you through upper/lower, front/back/top segments.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#eef6fb",
+  "theme_color": "#1e6091",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
