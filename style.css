@@ -119,27 +119,35 @@ h2 {
   color: #1e6091;
 }
 
-.arch-base {
+/* faint outline of the whole tunnel shape: outer rim + inner rim + ends */
+.tunnel-base {
   fill: none;
   stroke: #cdd9e0;
-  stroke-width: 14;
-  stroke-linecap: round;
+  stroke-width: 2;
 }
 
-.arch-seg {
+/* fills the band between outer and inner rim -> "top" (chewing surface) */
+.tunnel-band {
+  fill: transparent;
+  stroke: none;
+  transition: fill 0.25s ease;
+}
+
+.tunnel-band.on {
+  fill: rgba(42, 157, 143, 0.35);
+}
+
+/* outer rim -> "front"; inner rim -> "back" */
+.tunnel-rim {
   fill: none;
   stroke: transparent;
-  stroke-width: 14;
+  stroke-width: 6;
   stroke-linecap: round;
   transition: stroke 0.25s ease;
 }
 
-.arch-seg.on {
+.tunnel-rim.on {
   stroke: #2a9d8f;
-}
-
-.arch-seg.top-on {
-  stroke: #e76f51;
 }
 
 .dots {

@@ -70,57 +70,74 @@
     return `M ${p1.x.toFixed(2)} ${p1.y.toFixed(2)} A ${r} ${r} 0 ${largeArc} 1 ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`;
   }
 
+  // Each arch is drawn as a "tunnel" cross-section: an outer rim (the
+  // surface facing your lips/cheeks) and an inner rim (the surface facing
+  // your tongue), joined by a connecting band (the chewing/biting surface).
+  //   front = outer rim highlighted
+  //   back  = inner rim highlighted
+  //   top   = the connecting band highlighted
   const archConfig = {
-    upper: { cx: 100, cy: 75, r: 55, start: 200, end: 340 },
-    lower: { cx: 100, cy: 125, r: 55, start: 20, end: 160 },
+    upper: { cx: 100, cy: 68, rOuter: 60, rInner: 34, start: 200, end: 340 },
+    lower: { cx: 100, cy: 132, rOuter: 60, rInner: 34, start: 20, end: 160 },
   };
+
+  function ringPath(cx, cy, rOuter, rInner, startAngle, endAngle) {
+    const o1 = polar(cx, cy, rOuter, startAngle);
+    const o2 = polar(cx, cy, rOuter, endAngle);
+    const i1 = polar(cx, cy, rInner, startAngle);
+    const i2 = polar(cx, cy, rInner, endAngle);
+    const largeArc = endAngle - startAngle > 180 ? 1 : 0;
+    return (
+      `M ${o1.x.toFixed(2)} ${o1.y.toFixed(2)} ` +
+      `A ${rOuter} ${rOuter} 0 ${largeArc} 1 ${o2.x.toFixed(2)} ${o2.y.toFixed(2)} ` +
+      `L ${i2.x.toFixed(2)} ${i2.y.toFixed(2)} ` +
+      `A ${rInner} ${rInner} 0 ${largeArc} 0 ${i1.x.toFixed(2)} ${i1.y.toFixed(2)} Z`
+    );
+  }
 
   function buildMouth() {
     mouthSvg.innerHTML = "";
     const ns = "http://www.w3.org/2000/svg";
 
     Object.entries(archConfig).forEach(([arch, cfg]) => {
-      const span = cfg.end - cfg.start;
-      const third = span / 3;
-
-      // base full arc (background)
+      // faint base outline of the whole tunnel shape (outer rim + inner rim + ends)
       const base = document.createElementNS(ns, "path");
-      base.setAttribute("d", arcPath(cfg.cx, cfg.cy, cfg.r, cfg.start, cfg.end));
-      base.setAttribute("class", "arch-base");
+      base.setAttribute("d", ringPath(cfg.cx, cfg.cy, cfg.rOuter, cfg.rInner, cfg.start, cfg.end));
+      base.setAttribute("class", "tunnel-base");
       mouthSvg.appendChild(base);
 
-      // left, center(front), right segments
-      const segs = [
-        { part: "back", from: cfg.start, to: cfg.start + third },
-        { part: "front", from: cfg.start + third, to: cfg.start + 2 * third },
-        { part: "back", from: cfg.start + 2 * third, to: cfg.end },
-      ];
+      // top: fill of the connecting band between outer and inner rim
+      const band = document.createElementNS(ns, "path");
+      band.setAttribute("d", ringPath(cfg.cx, cfg.cy, cfg.rOuter, cfg.rInner, cfg.start, cfg.end));
+      band.setAttribute("class", "tunnel-band");
+      band.dataset.arch = arch;
+      mouthSvg.appendChild(band);
 
-      segs.forEach((s, i) => {
-        const path = document.createElementNS(ns, "path");
-        path.setAttribute("d", arcPath(cfg.cx, cfg.cy, cfg.r, s.from, s.to));
-        path.setAttribute("class", "arch-seg");
-        path.dataset.arch = arch;
-        path.dataset.part = s.part;
-        path.dataset.idx = i;
-        mouthSvg.appendChild(path);
-      });
+      // front: outer rim stroke
+      const outer = document.createElementNS(ns, "path");
+      outer.setAttribute("d", arcPath(cfg.cx, cfg.cy, cfg.rOuter, cfg.start, cfg.end));
+      outer.setAttribute("class", "tunnel-rim tunnel-rim-outer");
+      outer.dataset.arch = arch;
+      mouthSvg.appendChild(outer);
+
+      // back: inner rim stroke
+      const inner = document.createElementNS(ns, "path");
+      inner.setAttribute("d", arcPath(cfg.cx, cfg.cy, cfg.rInner, cfg.start, cfg.end));
+      inner.setAttribute("class", "tunnel-rim tunnel-rim-inner");
+      inner.dataset.arch = arch;
+      mouthSvg.appendChild(inner);
     });
   }
 
   function highlightSegment(seg) {
-    const paths = mouthSvg.querySelectorAll(".arch-seg");
-    paths.forEach((p) => {
-      p.classList.remove("on", "top-on");
-      const sameArch = p.dataset.arch === seg.arch;
-      if (!sameArch) return;
-
-      if (seg.part === "top") {
-        // highlight the whole arch (all three sub-segments) in the "top" color
-        p.classList.add("top-on");
-      } else if (p.dataset.part === seg.part) {
-        p.classList.add("on");
-      }
+    mouthSvg.querySelectorAll(".tunnel-band").forEach((el) => {
+      el.classList.toggle("on", el.dataset.arch === seg.arch && seg.part === "top");
+    });
+    mouthSvg.querySelectorAll(".tunnel-rim-outer").forEach((el) => {
+      el.classList.toggle("on", el.dataset.arch === seg.arch && seg.part === "front");
+    });
+    mouthSvg.querySelectorAll(".tunnel-rim-inner").forEach((el) => {
+      el.classList.toggle("on", el.dataset.arch === seg.arch && seg.part === "back");
     });
   }
 
